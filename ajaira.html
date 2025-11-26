@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Deposit Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background: #eef2f7;
+}
+header {
+    background: #111;
+    color: #fff;
+    text-align: center;
+    padding: 15px;
+    font-size: 22px;
+}
+.box {
+    width: 95%;
+    max-width: 800px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #ccc;
+}
+.req {
+    background: #fafafa;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-left: 4px solid #444;
+    border-radius: 5px;
+}
+button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    margin-right: 5px;
+    margin-top: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+.approve { background: #4CAF50; color: #fff; }
+.reject { background: #e53935; color: #fff; }
+</style>
+</head>
+<body>
+
+<header>ADMIN PANEL - DEPOSITS</header>
+
+<div class="box">
+    <h2>Deposit Requests</h2>
+    <div id="depositList"></div>
+</div>
+
+<script>
+// Sample users & deposits if not exists
+if(!localStorage.getItem("users")) {
+    localStorage.setItem("users", JSON.stringify([
+        {name:"John Doe", email:"john@example.com", balance:0},
+        {name:"Jane Smith", email:"jane@example.com", balance:0}
+    ]));
+}
+if(!localStorage.getItem("deposits")) {
+    localStorage.setItem("deposits", JSON.stringify([
+        {email:"john@example.com", method:"Bkash", amount:1000, txid:"TX123", status:"pending"},
+        {email:"jane@example.com", method:"Nagad", amount:500, txid:"TX456", status:"pending"}
+    ]));
+}
+
+// Load deposits
+function loadDeposits() {
+    let deposits = JSON.parse(localStorage.getItem("deposits")) || [];
+    let html = "";
+    if(deposits.length === 0) {
+        html = "<p>No deposit requests found.</p>";
+    } else {
+        deposits.forEach((d,i)=>{
+            html += `<div class="req">
+                <b>User:</b> ${d.email}<br>
+                <b>Method:</b> ${d.method}<br>
+                <b>Amount:</b> ${d.amount}৳<br>
+                <b>TXID:</b> ${d.txid}<br>
+                <b>Status:</b> <span id="status-${i}">${d.status}</span><br>
+                ${d.status.toLowerCase() === "pending" ? `
+                <button class="approve" onclick="approveDeposit(${i})">Approve</button>
+                <button class="reject" onclick="rejectDeposit(${i})">Reject</button>
+                ` : ""}
+            </div>`;
+        });
+    }
+    document.getElementById("depositList").innerHTML = html;
+}
+
+// Approve
+function approveDeposit(i){
+    let deposits = JSON.parse(localStorage.getItem("deposits")) || [];
+    let users = JSON.parse(localStorage.getItem("users")) || [];
+    let dep = deposits[i];
+    if(dep.status.toLowerCase()!=="pending") return;
+    dep.status = "approved";
+
+    let user = users.find(u=>u.email===dep.email);
+    if(user) user.balance = (user.balance||0) + Number(dep.amount);
+
+    localStorage.setItem("deposits", JSON.stringify(deposits));
+    localStorage.setItem("users", JSON.stringify(users));
+    alert(`Deposit Approved for ${dep.email} ✔`);
+    loadDeposits();
+}
+
+// Reject
+function rejectDeposit(i){
+    let deposits = JSON.parse(localStorage.getItem("deposits")) || [];
+    let dep = deposits[i];
+    if(dep.status.toLowerCase()!=="pending") return;
+    dep.status = "rejected";
+
+    localStorage.setItem("deposits", JSON.stringify(deposits));
+    alert(`Deposit Rejected for ${dep.email} ❌`);
+    loadDeposits();
+}
+
+loadDeposits();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Dashboard</title>
+<style>
+body{font-family:Poppins;background:#eef2f7;margin:0;padding:20px}
+.box{max-width:400px;margin:auto;background:#fff;padding:20px;border-radius:10px;text-align:center}
+button{width:100%;padding:12px;background:#2196F3;border:0;color:#fff;font-size:16px;margin:10px 0;border-radius:6px}
+.logout{background:#f44336}
+</style>
+</head>
+<body>
+
+<div class="box">
+<h2>User Dashboard</h2>
+<p id="email"></p>
+<h3>Balance: <span id="bal">0</span> ৳</h3>
+
+<button onclick="location.href='deposit.html'">Deposit</button>
+<button onclick="location.href='orders.html'">Book Order</button>
+<button class="logout" onclick="logout()">Logout</button>
+</div>
+
+<script>
+let email = localStorage.getItem("loggedIn");
+if(!email) location.href="login.html";
+
+let users = JSON.parse(localStorage.getItem("users"));
+let user = users.find(u=>u.email===email);
+
+document.getElementById("email").innerText = user.email;
+document.getElementById("bal").innerText = user.balance;
+
+function logout(){
+    localStorage.removeItem("loggedIn");
+    location.href="login.html";
+}
+</script>
+
+</body>
+</html>

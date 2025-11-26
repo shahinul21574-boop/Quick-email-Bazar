@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>My Orders</title>
+<style>
+body{font-family:Poppins;background:#eef2f7;margin:0;padding:20px}
+.box{max-width:600px;margin:auto;background:#fff;padding:20px;border-radius:10px}
+h2{text-align:center}
+.order{
+    border:1px solid #ddd;padding:12px;border-radius:8px;margin-bottom:10px;
+}
+.pending{color:#ff9800;font-weight:bold}
+.approved{color:green;font-weight:bold}
+.rejected{color:red;font-weight:bold}
+</style>
+</head>
+<body>
+
+<div class="box">
+<h2>Your Orders</h2>
+<div id="orderList"></div>
+</div>
+
+<script>
+let email = localStorage.getItem("loggedIn");
+if(!email) location.href = "login.html";
+
+let orders = JSON.parse(localStorage.getItem("orders") || "[]");
+
+let myOrders = orders.filter(o => o.email === email);
+
+let ui = "";
+
+if(myOrders.length === 0){
+    ui = "<p>No order history found.</p>";
+} else {
+    myOrders.forEach(o=>{
+        let cls = o.status.toLowerCase();
+        ui += `
+        <div class="order">
+            <p><b>Product:</b> ${o.product}</p>
+            <p><b>Quantity:</b> ${o.qty}</p>
+            <p><b>Total:</b> ${o.total} ৳</p>
+            <p><b>Status:</b> <span class="${cls}">${o.status}</span></p>
+            ${o.status==="Approved" ? "<p>✔ Please check your Gmail inbox.</p>" : ""}
+        </div>`;
+    });
+}
+
+document.getElementById("orderList").innerHTML = ui;
+</script>
+
+</body>
+</html>

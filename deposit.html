@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Deposit</title>
+<p>💳 PAYMENT METHOD 💸
+ 
+SEND MONEY✔️
+
+📱 BKASH,NAGAD,ROCKET: 01759415191
+
+SUBMITE TXID AFTER SEND THE PAYMENT ✅</p>
+<style>
+body{font-family:Poppins;background:#eef2f7;padding:20px}
+.box{max-width:450px;margin:auto;background:#fff;padding:20px;border-radius:10px}
+input,select{width:100%;padding:12px;margin:10px 0;border:1px solid #ccc;border-radius:6px}
+button{width:100%;padding:12px;background:#2196F3;border:0;color:#fff;font-size:16px;border-radius:6px}
+</style>
+</head>
+<body>
+
+<div class="box">
+<h2>Deposit</h2>
+
+<select id="method">
+  <option value="bkash">bKash</option>
+  <option value="nagad">Nagad</option>
+  <option value="rocket">Rocket</option>
+</select>
+
+<input id="amount" type="number" placeholder="Amount">
+<input id="txid" placeholder="TXID">
+
+<button onclick="submitDeposit()">Submit Deposit</button>
+</div>
+
+<script>
+let email = localStorage.getItem("loggedIn");
+if(!email) location.href = "login.html";
+
+function submitDeposit(){
+    let method = document.getElementById("method").value;
+    let amount = Number(document.getElementById("amount").value);
+    let txid = document.getElementById("txid").value;
+
+    if(!amount || !txid) return alert("Fill all fields");
+
+    let deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
+
+    deposits.push({
+        email: email,
+        method: method,
+        amount: amount,
+        txid: txid,
+        status: "Pending"
+    });
+
+    localStorage.setItem("deposits", JSON.stringify(deposits));
+
+    alert("Deposit submitted. Wait for approval.");
+    location.href = "dashboard.html";
+}
+</script>
+
+</body>
+</html>

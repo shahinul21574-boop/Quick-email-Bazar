@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Signup</title>
+<style>
+body{font-family:Poppins;background:#eef2f7;margin:0;padding:20px}
+.box{max-width:400px;margin:auto;background:#fff;padding:20px;border-radius:10px}
+input{width:100%;padding:12px;margin:10px 0;border:1px solid #ccc;border-radius:6px}
+button{width:100%;padding:12px;background:#2196F3;border:0;color:#fff;font-size:16px;border-radius:6px}
+</style>
+</head>
+<body>
+
+<div class="box">
+<h2>Create Account</h2>
+<input id="name" placeholder="Full Name">
+<input id="email" placeholder="Email">
+<input id="pass" type="password" placeholder="Password">
+<button onclick="signup()">Sign Up</button>
+</div>
+
+<script>
+function signup(){
+    let name = name.value.trim();
+    let email = document.getElementById("email").value.trim();
+    let pass = document.getElementById("pass").value;
+
+    if(!name || !email || !pass) return alert("All fields required");
+
+    let users = JSON.parse(localStorage.getItem("users") || "[]");
+
+    if(users.find(u=>u.email===email))
+        return alert("Email already exists!");
+
+    let user = {
+        name:name,
+        email:email,
+        password:pass,
+        balance:0
+    };
+
+    users.push(user);
+    localStorage.setItem("users",JSON.stringify(users));
+    localStorage.setItem("loggedIn",email);
+
+    alert("Signup Successful!");
+    location.href="dashboard.html";
+}
+</script>
+
+</body>
+</html>

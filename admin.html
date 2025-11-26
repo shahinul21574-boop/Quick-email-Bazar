@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FULL ADMIN PANEL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{margin:0;background:#eef2f7;font-family:Poppins,sans-serif}
+header{background:#111;color:#fff;padding:15px;text-align:center;font-size:22px}
+.container{width:95%;margin:20px auto;background:#fff;padding:15px;border-radius:10px;box-shadow:0 0 10px #ccc}
+h2{margin:10px 0;font-size:20px}
+.section{margin-bottom:25px}
+.item{background:#f4f4f4;padding:12px;border-left:5px solid #333;border-radius:7px;margin-bottom:12px}
+button{padding:7px 14px;border:0;border-radius:5px;cursor:pointer;font-weight:600;margin:5px 3px}
+.add{background:#0077ff;color:#fff}
+.del{background:#e63946;color:#fff}
+.edit{background:#ffa600;color:#fff}
+.approve{background:#4caf50;color:#fff}
+.reject{background:#c1121f;color:#fff}
+input{padding:8px;width:90%;margin:6px 0;border-radius:5px;border:1px solid #bbb}
+</style>
+</head>
+
+<body>
+
+<header>ADMIN PANEL (FULL CONTROL)</header>
+
+<div class="container">
+
+    <!-- PRODUCTS -->
+    <div class="section">
+        <h2>Products Manage</h2>
+
+        <div>
+            <input id="pName" placeholder="Product Name">
+            <input id="pPrice" placeholder="Product Price">
+            <input id="pStock" placeholder="Stock">
+            <button class="add" onclick="addProduct()">Add Product</button>
+        </div>
+
+        <div id="productArea"></div>
+    </div>
+
+    <!-- DEPOSIT REQUESTS -->
+    <div class="section">
+        <h2>Deposit Requests</h2>
+        <div id="depositArea"></div>
+    </div>
+
+    <!-- ORDER REQUESTS -->
+    <div class="section">
+        <h2>Order Requests</h2>
+        <div id="orderArea"></div>
+    </div>
+
+    <!-- USERS -->
+    <div class="section">
+        <h2>All Users</h2>
+        <div id="userArea"></div>
+    </div>
+
+</div>
+
+<script>
+// ===========================
+// LOAD EVERYTHING
+// ===========================
+function loadAll(){
+    loadProducts();
+    loadDeposits();
+    loadOrders();
+    loadUsers();
+}
+
+// ===========================
+// PRODUCT FUNCTIONS
+// ===========================
+function addProduct(){
+    let name=document.getElementById("pName").value;
+    let price=document.getElementById("pPrice").value;
+    let stock=document.getElementById("pStock").value;
+
+    if(!name||!price||!stock){alert("Enter all fields!");return;}
+
+    let products=JSON.parse(localStorage.getItem("products"))||[];
+
+    products.push({
+        name:name,
+        price:Number(price),
+        stock:Number(stock)
+    });
+
+    localStorage.setItem("products",JSON.stringify(products));
+    loadProducts();
+}
+
+function loadProducts(){
+    let list=JSON.parse(localStorage.getItem("products"))||[];
+    let area=document.getElementById("productArea");
+    area.innerHTML="";
+
+    list.forEach((p,i)=>{
+        area.innerHTML+=`
+        <div class="item">
+            <b>Name:</b> ${p.name}<br>
+            <b>Price:</b> ${p.price}৳<br>
+            <b>Stock:</b> ${p.stock}<br>
+
+            <button class="edit" onclick="increaseStock(${i})">Stock +</button>
+            <button class="edit" onclick="decreaseStock(${i})">Stock -</button>
+            <button class="edit" onclick="editPrice(${i})">Edit Price</button>
+            <button class="del" onclick="deleteProduct(${i})">Delete</button>
+        </div>`;
+    });
+}
+
+function increaseStock(i){
+    let p=JSON.parse(localStorage.getItem("products"))||[];
+    p[i].stock++;
+    localStorage.setItem("products",JSON.stringify(p));
+    loadProducts();
+}
+
+function decreaseStock(i){
+    let p=JSON.parse(localStorage.getItem("products"))||[];
+    if(p[i].stock>0) p[i].stock--;
+    localStorage.setItem("products",JSON.stringify(p));
+    loadProducts();
+}
+
+function editPrice(i){
+    let newPrice=prompt("New Price?");
+    if(!newPrice)return;
+
+    let p=JSON.parse(localStorage.getItem("products"))||[];
+    p[i].price=Number(newPrice);
+
+    localStorage.setItem("products",JSON.stringify(p));
+    loadProducts();
+}
+
+function deleteProduct(i){
+    let p=JSON.parse(localStorage.getItem("products"))||[];
+    p.splice(i,1);
+    localStorage.setItem("products",JSON.stringify(p));
+    loadProducts();
+}
+
+// ===========================
+// DEPOSIT CONTROL
+// ===========================
+function loadDeposits(){
+    let list=JSON.parse(localStorage.getItem("deposits"))||[];
+    let area=document.getElementById("depositArea");
+    area.innerHTML="";
+
+    if(list.length==0){
+        area.innerHTML="<p>No deposit requests.</p>";
+        return;
+    }
+
+    list.forEach((d,i)=>{
+        area.innerHTML+=`
+        <div class="item">
+            <b>User:</b> ${d.email}<br>
+            <b>Method:</b> ${d.method}<br>
+            <b>Amount:</b> ${d.amount}৳<br>
+            <b>TXID:</b> ${d.txid}<br>
+            <b>Status:</b> ${d.status}<br><br>
+
+            ${d.status=="pending"?
+            `<button class="approve" onclick="approveDeposit(${i})">Approve</button>
+            <button class="reject" onclick="rejectDeposit(${i})">Reject</button>`
+            :`<i>Completed</i>`}
+        </div>`;
+    });
+}
+
+function approveDeposit(i){
+    let dep=JSON.parse(localStorage.getItem("deposits"))||[];
+    let users=JSON.parse(localStorage.getItem("users"))||[];
+
+    let d=dep[i];
+    d.status="approved";
+
+    let user=users.find(u=>u.email==d.email);
+    if(user) user.balance=(user.balance||0)+Number(d.amount);
+
+    localStorage.setItem("users",JSON.stringify(users));
+    localStorage.setItem("deposits",JSON.stringify(dep));
+
+    loadDeposits();
+    alert("Deposit Approved!");
+}
+
+function rejectDeposit(i){
+    let dep=JSON.parse(localStorage.getItem("deposits"))||[];
+    dep[i].status="rejected";
+    localStorage.setItem("deposits",JSON.stringify(dep));
+    loadDeposits();
+}
+
+// ===========================
+// ORDER CONTROL
+// ===========================
+function loadOrders(){
+    let list=JSON.parse(localStorage.getItem("orders"))||[];
+    let area=document.getElementById("orderArea");
+    area.innerHTML="";
+
+    if(list.length==0){
+        area.innerHTML="<p>No orders found.</p>";
+        return;
+    }
+
+    list.forEach((o,i)=>{
+        area.innerHTML+=`
+        <div class="item">
+            <b>User:</b> ${o.email}<br>
+            <b>Product:</b> ${o.product}<br>
+            <b>Quantity:</b> ${o.qty}<br>
+            <b>Total:</b> ${o.total}৳<br>
+            <b>Status:</b> ${o.status}<br><br>
+
+            ${o.status=="pending"?
+            `<button class="approve" onclick="approveOrder(${i})">Approve</button>
+            <button class="reject" onclick="rejectOrder(${i})">Reject</button>`
+            :`<i>Action Done</i>`}
+        </div>`;
+    });
+}
+
+function approveOrder(i){
+    let orders=JSON.parse(localStorage.getItem("orders"))||[];
+    let products=JSON.parse(localStorage.getItem("products"))||[];
+
+    let o=orders[i];
+    o.status="approved";
+
+    let p=products.find(x=>x.name==o.product);
+    if(p) p.stock-=Number(o.qty);
+
+    localStorage.setItem("products",JSON.stringify(products));
+    localStorage.setItem("orders",JSON.stringify(orders));
+
+    loadOrders();
+    alert("Order Approved!");
+}
+
+function rejectOrder(i){
+    let orders=JSON.parse(localStorage.getItem("orders"))||[];
+    let users=JSON.parse(localStorage.getItem("users"))||[];
+
+    let o=orders[i];
+    o.status="rejected";
+
+    let u=users.find(x=>x.email==o.email);
+    if(u) u.balance+=Number(o.total);  // refund
+
+    localStorage.setItem("users",JSON.stringify(users));
+    localStorage.setItem("orders",JSON.stringify(orders));
+
+    loadOrders();
+    alert("Order Rejected + Refund Completed!");
+}
+
+// ===========================
+// USERS
+// ===========================
+function loadUsers(){
+    let users=JSON.parse(localStorage.getItem("users"))||[];
+    let area=document.getElementById("userArea");
+
+    if(users.length==0){ area.innerHTML="<p>No users.</p>"; return; }
+
+    area.innerHTML="";
+    users.forEach(u=>{
+        area.innerHTML+=`
+        <div class="item">
+            <b>Email:</b> ${u.email}<br>
+            <b>Balance:</b> ${u.balance}৳
+        </div>`;
+    });
+}
+
+loadAll();
+</script>
+
+</body>
+</html>

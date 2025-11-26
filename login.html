@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+<style>
+body{font-family:Poppins;background:#eef2f7;margin:0;padding:20px}
+.box{max-width:400px;margin:auto;background:#fff;padding:20px;border-radius:10px}
+input{width:100%;padding:12px;margin:10px 0;border:1px solid #ccc;border-radius:6px}
+button{width:100%;padding:12px;background:#4caf50;border:0;color:#fff;font-size:16px;border-radius:6px}
+</style>
+</head>
+<body>
+
+<div class="box">
+<h2>Login</h2>
+<input id="email" placeholder="Email">
+<input id="pass" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+</div>
+
+<script>
+// Already logged in?
+if(localStorage.getItem("loggedIn")){
+    location.href="dashboard.html";
+}
+
+function login(){
+    let email = document.getElementById("email").value;
+    let pass = document.getElementById("pass").value;
+
+    let users = JSON.parse(localStorage.getItem("users") || "[]");
+    let user = users.find(u=>u.email===email && u.password===pass);
+
+    if(!user) return alert("Account not found!");
+
+    localStorage.setItem("loggedIn",email);
+    location.href="dashboard.html";
+}
+</script>
+
+</body>
+</html>
